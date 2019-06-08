@@ -53,7 +53,7 @@ private:
 		int next_block_BID;
 	};
 public:
-	BTree(int root, int depth, const char* file_name, int block_size); 
+	BTree(int root, int depth, const char* file_name, int block_size);
 	bool insert_in_nonleaf(int key, deque<int>& BIDs, int left_child, int right_child);
 	bool insert_in_leaf(int key, int rid);
 	void print(const char* output_path);
@@ -70,7 +70,7 @@ public:
 		for (int i = 0; i < max_entry_num; i++) {
 			file.read((char*)&nBID, sizeof(int));
 			file.read((char*)&key, sizeof(int));
-			node->entry[i] = IndexEntry( key, nBID );
+			node->entry[i] = IndexEntry(key, nBID);
 		}
 		file.read((char*)&node->next_level_BID, sizeof(int));
 		file.close();
@@ -150,7 +150,7 @@ BTree::BTree(int root, int depth, const char* file_name, int block_size) {
 }
 template<typename T>
 vector<T> vector_slice(vector<T> const& v, int m, int n) {
-	vector<T> vec(n-m+1);
+	vector<T> vec(n - m + 1);
 	copy(v.begin() + m, v.begin() + n + 1, vec.begin());
 	return vec;
 }
@@ -159,7 +159,7 @@ bool BTree::insert_in_nonleaf(int key, deque<int>& BIDs, int left_child, int rig
 		rootBID = ++num_of_blocks;
 		depth++;
 		NonLeafNode* nonleaf_node = new NonLeafNode(max_entry_num);
-		nonleaf_node->entry[0]=IndexEntry(key, left_child);
+		nonleaf_node->entry[0] = IndexEntry(key, left_child);
 		nonleaf_node->entry[1].NextLevelBID = right_child;
 		write_block(rootBID, nonleaf_node);
 		delete nonleaf_node;
@@ -169,15 +169,15 @@ bool BTree::insert_in_nonleaf(int key, deque<int>& BIDs, int left_child, int rig
 		int insert_node_block_num = BIDs.back();
 		BIDs.pop_back();
 		insert_node = get_block(insert_node_block_num);
-		
+
 		//새로운 entry 삽입
-		int insert_index; 
+		int insert_index;
 		for (insert_index = 0; insert_index < max_entry_num; insert_index++) {
 			if (insert_node->entry[insert_index].Key == NULL || insert_node->entry[insert_index].Key > key) {
 				break;
 			}
 		}
-		if (insert_node->entry.back().Key==NULL) {
+		if (insert_node->entry.back().Key == NULL) {
 			insert_node->next_level_BID = insert_node->entry[max_entry_num - 1].NextLevelBID;
 			for (int i = max_entry_num - 1; i > insert_index; i--) {
 				insert_node->entry[i] = insert_node->entry[i - 1];
@@ -185,9 +185,9 @@ bool BTree::insert_in_nonleaf(int key, deque<int>& BIDs, int left_child, int rig
 			insert_node->entry[insert_index] = IndexEntry(key, left_child);
 		}
 		else {
-			insert_node->entry.insert(insert_node->entry.begin()+insert_index, (IndexEntry(key, left_child)));
+			insert_node->entry.insert(insert_node->entry.begin() + insert_index, (IndexEntry(key, left_child)));
 		}
-		
+
 		//자식 이어주기
 		//맨 마지막 entry일 때
 		if (insert_index == insert_node->entry.size() - 1) {
@@ -204,7 +204,7 @@ bool BTree::insert_in_nonleaf(int key, deque<int>& BIDs, int left_child, int rig
 			//split되어 올라갈 key
 			int rising_key = insert_node->entry[max_entry_num / 2].Key;
 			insert_node->entry[max_entry_num / 2].Key = 0;
-			
+
 			//split
 			int k = 0;
 			for (int i = max_entry_num / 2 + 1; i < max_entry_num + 1; i++, k++) {
@@ -222,10 +222,10 @@ bool BTree::insert_in_nonleaf(int key, deque<int>& BIDs, int left_child, int rig
 			write_block(right_node_block_num, right_node);
 			delete right_node;
 		}
-			
+
 		write_block(insert_node_block_num, insert_node);
-	// https://youtu.be/_nY8yR6iqx4?t=225
-	// 영상 : non-leaf가 overflow나는 상황에서 하위레벨에 19는 포함하지 않는다.
+		// https://youtu.be/_nY8yR6iqx4?t=225
+		// 영상 : non-leaf가 overflow나는 상황에서 하위레벨에 19는 포함하지 않는다.
 		delete insert_node;
 	}
 	return true;
@@ -265,8 +265,8 @@ bool BTree::insert_in_leaf(int key, int rid) {
 		insert_node->next_block_BID = right_node_block_num;
 
 		//spilt
-		right_node->entry = vector_slice(insert_node->entry, (max_entry_num-1) / 2+1, max_entry_num);
-		insert_node->entry = vector_slice(insert_node->entry, 0,(max_entry_num-1) / 2);
+		right_node->entry = vector_slice(insert_node->entry, (max_entry_num - 1) / 2 + 1, max_entry_num);
+		insert_node->entry = vector_slice(insert_node->entry, 0, (max_entry_num - 1) / 2);
 
 		insert_in_nonleaf(right_node->entry[0].Key, block_num, insert_node_block_num, right_node_block_num);
 		write_block(right_node_block_num, right_node);
@@ -291,7 +291,7 @@ void BTree::print(const char* output_path) {
 				break;
 			}
 			output << tmp->entry[i].Key;
-			if (tmp->entry.size() - 1 > i) output << ", ";
+			if (tmp->entry.size() - 1 > i) output << ",";
 		}
 	}
 	else if (depth == 2) {
@@ -325,10 +325,10 @@ void BTree::print(const char* output_path) {
 		output << "<0>\n\n";
 		for (int i = 0; i < tmp->entry.size(); i++) {
 			if (tmp->entry[i].Key == NULL) {
-				output << "\n"; 
+				output << "\n";
 				break;
 			}
-			output << tmp->entry[i].Key <<" ";
+			output << tmp->entry[i].Key << " ";
 		}
 		output << "\n<1>\n\n";
 		for (int sec = 0; sec < tmp->entry.size(); sec++) {
@@ -336,9 +336,9 @@ void BTree::print(const char* output_path) {
 			for (int i = 0; i < child->entry.size(); i++) {
 				if (child->entry[i].Key == NULL) break;
 				output << child->entry[i].Key;
-				if ((sec+1==tmp->entry.size() && tmp->next_level_BID!=NULL)
-					||(sec+1<tmp->entry.size() && tmp->entry[sec+1].NextLevelBID !=NULL)
-					||(child->entry.size() - 1 > i && child->entry[i+1].Key!=NULL)) {
+				if ((sec + 1 == tmp->entry.size() && tmp->next_level_BID != NULL)
+					|| (sec + 1 < tmp->entry.size() && tmp->entry[sec + 1].NextLevelBID != NULL)
+					|| (child->entry.size() - 1 > i && child->entry[i + 1].Key != NULL)) {
 					output << ",";
 				}
 			}
@@ -434,18 +434,18 @@ int BTree::search(int startRange, int endRange, const char* output_path) {
 			found = true;
 			output << searchNode->entry[i].Key << "," << searchNode->entry[i].Value;
 			if (searchNode->entry.size() - 1 > i) {
-				output << " ";
-			}
-			if (searchNode->entry.size() - 1 == i) {
-				i = -1;
-				if (searchNode->next_block_BID == NULL) break;
-				output << " ";
-				searchNode = get_block(searchNode->next_block_BID, depth);
+				output << "\t";
 			}
 		}
 		else if (searchNode->entry[i].Key >= endRange) {
 			break;
 		}
+			if (searchNode->entry.size() - 1 == i) {
+				i = -1;
+				if (searchNode->next_block_BID == NULL) break;
+				if(found) output << "\t";
+				searchNode = get_block(searchNode->next_block_BID, depth);
+			}
 	}
 	if (!found) {
 		output << "not found";
@@ -455,10 +455,11 @@ int BTree::search(int startRange, int endRange, const char* output_path) {
 }
 int main(int argc, char* argv[])
 {
-	char command = 's';
+	char command = 'c';
 	const char* file_name = "btree.bin";
+	//size 20부터 가능
 	int block_size = 20;
-	const char* input_file_path = "s.txt";
+	const char* input_file_path = "sample_i.txt";
 	const char* output_file_path = "output.txt";
 	if (argc > 1) {
 		command = argv[1][0];
@@ -504,7 +505,9 @@ int main(int argc, char* argv[])
 		}
 		string str;
 		while (!input_file.eof()) {
+			str = "";
 			input_file >> str;
+			if (str == "") continue;
 			stringstream sstream(str);
 			vector<int> token;
 			string tmp;
@@ -529,7 +532,9 @@ int main(int argc, char* argv[])
 		}
 		string str;
 		while (!input_file.eof()) {
+			str = "";
 			input_file >> str;
+			if (str == "") continue;
 			myBtree->search(stoi(str), output_file_path);
 		}
 		input_file.close();
@@ -547,7 +552,9 @@ int main(int argc, char* argv[])
 		}
 		string str;
 		while (!input_file.eof()) {
+			str = "";
 			input_file >> str;
+			if (str == "") continue;
 			stringstream sstream(str);
 			vector<int> token;
 			string tmp;
